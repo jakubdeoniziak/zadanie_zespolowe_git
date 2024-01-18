@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>LeafletWFS</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <button>
+      <a
+        href="http://localhost:8080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=aplikacja_webowa:SKJZ_L&outputFormat=shape-zip&srsName=epsg:4326"
+        >Pobierz shp</a
+      >
+    </button>
+<script>
+  var mapOptions = {
+                    center: [54.35128960136987, 18.64587740311248],
+                    zoom: 10,
+                    }
+
+         var map = new L.map('map', mapOptions);
+
+  var osm = L.tileLayer("https://%7Bs%7D.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png", {
+    maxZoom: 19,
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  });
+
+  osm.addTo(map);
+
+
+  var wfs_url =
+    "http://localhost:8080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=aplikacja_webowa:SKJZ_L&outputFormat=application/json&srsName=epsg:4326";
+  var wfs_url2 = "http://localhost:8080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=aplikacja_webowa:PTTR_A&outputFormat=application/json&srsName=epsg:4326";
+  $.getJSON(wfs_url).then((res) => {
+    var layer = L.geoJson(res, {
+      onEachFeature: function (f, l) {
+        l.bindPopup("Nawierzchnia: " + f.properties.matnawierz + " Kategoria istnienia:" + f.properties.x_katist);
+      },
+
+      style: function(){
+    return { 
+        color:"grey",
+        dashArray: "0 4 0",
+        width: "5px"}}
+    }).addTo(map);
+ $.getJSON(wfs_url2).then((res) => {
+    var layer = L.geoJson(res, {
+      onEachFeature: function (f, l) {
+        l.bindPopup("popup");
+      },
+
+      style: function(){
+    return { 
+        color:"grey",}}
+    }).addTo(map);
+    map.fitBounds(layer.getBounds());
+  });
+</script>
+</body>
+</html>
